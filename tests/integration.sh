@@ -190,4 +190,28 @@ out=$("$LAUNCHER" --state "$old" --index-url "$BASE/index.json" fetch --url "$BA
 cmp -s "$T/repo/alpha8.qcow2" "$old/images/custom/base.qcow2" || fail "custom image differs"
 grep -q '^last_id=continuous-main$' "$old/settings" || fail "fetch --url changed last_id: $(cat "$old/settings")"
 
+echo "== window (dummy video driver)"
+gui() { # keys
+    SDL_VIDEODRIVER=dummy CALCULINUX_LAUNCHER_SMOKE=3 CALCULINUX_LAUNCHER_SMOKE_KEYS="$1" \
+        "$LAUNCHER" --state "$T/gui" --index-url "$BASE/index.json" --default-id continuous-main gui 2>/dev/null
+}
+rc=0; out=$(gui "") || rc=$?
+if [ "$rc" = 20 ]; then
+    echo "   skipped: built without the window, or SDL has no dummy video driver"
+else
+    [ "$rc" = 10 ] || fail "closing the window: exit code $rc"
+    [ -z "$out" ] || fail "closing the window printed '$out'"
+    # Second row is v1.0.0-alpha8: Enter downloads and boots it.
+    rc=0; out=$(gui down,enter) || rc=$?
+    [ "$rc" = 0 ] || fail "download and boot: exit code $rc"
+    [ "$out" = "id=v1.0.0-alpha8
+ssh_port=2222" ] || fail "download and boot printed '$out'"
+    cmp -s "$T/repo/alpha8.qcow2" "$T/gui/images/v1.0.0-alpha8/base.qcow2" || fail "window download differs"
+    # It is now the remembered image; Delete then Enter (confirm) removes it
+    # and must not boot anything.
+    rc=0; out=$(gui delete,enter) || rc=$?
+    [ "$rc" = 10 ] && [ -z "$out" ] || fail "delete: exit code $rc, printed '$out'"
+    [ ! -e "$T/gui/images/v1.0.0-alpha8" ] || fail "delete left the image"
+fi
+
 echo "integration tests passed"

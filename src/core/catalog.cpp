@@ -17,6 +17,7 @@ std::vector<CatalogRow> build_catalog(const Index& index, const State& state, bo
             row.status = ImageStatus::Downloaded;
         }
         row.has_state = state.has_state(entry.id);
+        row.partial = state.partial_size(entry.id);
         rows.push_back(std::move(row));
     }
 

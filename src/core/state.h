@@ -63,6 +63,8 @@ public:
     std::string installed_sha(const std::string& id) const;
     // Whether the image has an overlay or U-Boot environment (user changes).
     bool has_state(const std::string& id) const;
+    // Size of an unfinished download, 0 if there is none.
+    uint64_t partial_size(const std::string& id) const;
     // Ids with a downloaded base image, sorted.
     std::vector<std::string> downloaded_ids() const;
 

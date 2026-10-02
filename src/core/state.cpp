@@ -164,6 +164,12 @@ bool State::has_state(const std::string& id) const {
     return fs::exists(image_dir(id) / "disk.qcow2", ec) || fs::exists(image_dir(id) / "uboot-env.img", ec);
 }
 
+uint64_t State::partial_size(const std::string& id) const {
+    std::error_code ec;
+    auto size = fs::file_size(part_path(id), ec);
+    return ec ? 0 : (uint64_t)size;
+}
+
 std::vector<std::string> State::downloaded_ids() const {
     std::vector<std::string> ids;
     std::error_code ec;

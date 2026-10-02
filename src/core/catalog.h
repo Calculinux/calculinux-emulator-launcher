@@ -20,6 +20,7 @@ struct CatalogRow {
     IndexEntry entry;  // from the index, or rebuilt from meta.json when unpublished
     ImageStatus status = ImageStatus::NotDownloaded;
     bool has_state = false;  // overlay or U-Boot environment present
+    uint64_t partial = 0;    // bytes of an unfinished download on disk
 
     bool downloaded() const { return status != ImageStatus::NotDownloaded; }
 };
